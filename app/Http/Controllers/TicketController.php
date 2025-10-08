@@ -12,7 +12,11 @@ class TicketController extends Controller
     {
         // Fetch the latest events with tickets
         $events = Event::with('tickets')->get();
+        $featuredEvent = Event::with('tickets')
+        ->whereDate('event_date', '>=', now())
+        ->orderBy('event_date', 'asc')
+        ->first();
 
-        return view('welcome', compact('events'));
+        return view('home', compact('events', 'featuredEvent'));
     }
 }
