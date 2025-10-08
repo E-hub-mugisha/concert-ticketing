@@ -9,7 +9,7 @@ use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 
 // Home page
-Route::get('/', [TicketController::class, 'welcome'])->name('welcome');
+Route::get('/', [TicketController::class, 'welcome'])->name('home');
 
 // Tickets
 Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index'); // list all tickets/events
@@ -27,10 +27,6 @@ Route::get('/order/failed/{id}', [CheckoutController::class, 'failed'])->name('o
 Route::get('/payment/callback/{order}', [CheckoutController::class, 'paymentCallback'])->name('payment.callback');
 
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -44,6 +40,13 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::resource('events', EventController::class);
     Route::resource('tickets', TicketController::class);
     Route::resource('orders', OrderController::class);
+    Route::view('/users', 'admin.users.index')->name('users.index');
+    Route::view('/analytics/sales', 'admin.analytics.sales')->name('analytics.sales');
+    Route::view('/settings', 'admin.settings')->name('settings');
+
+    Route::get('orders/{order}/receipt', [OrderController::class, 'receipt'])
+    ->name('orders.receipt');
+
 });
 
 require __DIR__ . '/auth.php';

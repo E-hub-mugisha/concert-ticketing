@@ -12,4 +12,7 @@ class Event extends Model
     {
         return $this->hasMany(Ticket::class);
     }
+    protected $casts = [
+        'event_date' => 'datetime',
+    ];
 }

@@ -33,15 +33,15 @@
     <header id="header" class="header d-flex align-items-center fixed-top">
         <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
 
-            <a href="index.html" class="logo d-flex align-items-center">
+            <a href="{{ route('home')}}" class="logo d-flex align-items-center">
                 <!-- Uncomment the line below if you also wish to use an image logo -->
                 <!-- <img src="assets/img/logo.webp" alt=""> -->
-                <h1 class="sitename">Evently</h1>
+                <h1 class="sitename">{{ config('app.name')}}</h1>
             </a>
 
             <nav id="navmenu" class="navmenu">
                 <ul>
-                    <li><a href="index.html" class="active">Home</a></li>
+                    <li><a href="{{ route('home')}}" class="active">Home</a></li>
 
                 </ul>
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
@@ -84,7 +84,15 @@
                                     </div>
                                 </div>
                                 @if($featuredEvent->tickets && $featuredEvent->tickets->count())
-                                <a href="#tickets" class="btn btn-warning text-uppercase mt-3 px-4 py-2">Buy Ticket</a>
+                                <div class="cta-section">
+
+                                    <div class="cta-buttons">
+                                        <a href="#tickets" class="btn btn-primary btn-cta">Secure Your Seat</a>
+                                    </div>
+
+                                    <p class="cta-note">Limited to 200 executive participants • Early bird pricing ends January 31st</p>
+
+                                </div>
                                 @endif
                                 @else
                                 <h1 class="text-white">No upcoming event</h1>
@@ -101,18 +109,6 @@
                                 </div>
 
                             </div>
-
-                            <div class="cta-section">
-
-                                <div class="cta-buttons">
-                                    <a href="tickets.html" class="btn btn-primary btn-cta">Secure Your Seat</a>
-                                    <a href="speakers.html" class="btn btn-secondary btn-cta">View Speakers</a>
-                                </div>
-
-                                <p class="cta-note">Limited to 200 executive participants • Early bird pricing ends January 31st</p>
-
-                            </div>
-
                         </div><!-- End col-lg-10 -->
 
                     </div><!-- End row -->
@@ -144,14 +140,13 @@
             <div class="container">
 
                 <div class="row g-4">
-
+                    @if(isset($featuredEvent))
                     <div class="col-lg-6">
                         <div class="content">
-                            <h2>The Definitive Tech Innovation Summit</h2>
-                            <p class="lead">Morbi auctor ipsum vel leo cursus, ac tempor augue tempus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Nulla facilisi. Fusce vitae magna non nulla vulputate tincidunt.</p>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet, nulla et dictum interdum, nisi lorem egestas odio, vitae scelerisque enim ligula venenatis dolor. Maecenas nisl est, ultrices nec congue eget, auctor vitae massa.</p>
+                            <h2>{{ $featuredEvent->title }}</h2>
+                            <p class="lead">{{ $featuredEvent->description }}</p>
 
-                            <div class="stats-grid">
+                            <!-- <div class="stats-grid">
                                 <div class="stat-item">
                                     <div class="stat-number">3</div>
                                     <div class="stat-label">Days</div>
@@ -173,7 +168,7 @@
                             <div class="cta-section">
                                 <a href="#" class="btn btn-primary">View Full Agenda</a>
                                 <a href="#" class="btn btn-outline">Meet the Speakers</a>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
 
@@ -184,11 +179,11 @@
                                 <div class="gradient-overlay"></div>
                                 <div class="floating-badge">
                                     <i class="bi bi-calendar-event"></i>
-                                    <span>March 15-17, 2026</span>
+                                    <span>{{ \Carbon\Carbon::parse($featuredEvent->event_date)->format('F d, Y') }}</span>
                                 </div>
                             </div>
 
-                            <div class="highlight-cards">
+                            <!-- <div class="highlight-cards">
                                 <div class="highlight-card">
                                     <i class="bi bi-people-fill"></i>
                                     <h4>Global Networking</h4>
@@ -199,29 +194,18 @@
                                     <h4>Innovation Showcase</h4>
                                     <p>Discover cutting-edge technologies and startups</p>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
-
-                </div>
-
-                <div class="founder-quote">
-                    <div class="row align-items-center">
-                        <div class="col-lg-3 text-center">
-                            <img src="assets/img/person/person-m-8.webp" alt="Sarah Johnson" class="founder-img">
-                        </div>
-                        <div class="col-lg-9">
-                            <blockquote>
-                                <p>"Our mission has always been to bridge the gap between visionary ideas and practical implementation. This summit represents the culmination of years of bringing together the brightest minds in technology."</p>
-                                <cite>
-                                    <strong>Sarah Johnson</strong>
-                                    <span>Founder &amp; Event Director</span>
-                                </cite>
-                            </blockquote>
+                    @else
+                    <div class="col-12">
+                        <div class="content text-center">
+                            <h2>No upcoming event</h2>
+                            <p class="lead">Please check back later for new conferences and events.</p>
                         </div>
                     </div>
+                    @endif
                 </div>
-
             </div>
 
         </section><!-- /Intro Section -->
@@ -232,128 +216,122 @@
             <div class="container">
 
                 <div class="row gy-4">
-
+                    @if($events && $events->count())
+                    @foreach($events as $event)
+                    @foreach($event->tickets as $ticket)
                     <div class="col-lg-4 col-md-6">
                         <div class="ticket-card">
                             <div class="ticket-header">
-                                <h3>General Admission</h3>
+                                <h3>{{ $ticket->name }}</h3>
                                 <div class="ticket-price">
                                     <span class="currency">$</span>
-                                    <span class="amount">149</span>
+                                    <span class="amount">{{ number_format($ticket->price, 2) }}</span>
                                     <span class="period">/ticket</span>
                                 </div>
-                                <p class="ticket-duration">3-Day Access</p>
+                                <p class="ticket-duration">{{ $event->tickets->count() }} Tickets</p>
                             </div>
                             <div class="ticket-body">
                                 <ul class="ticket-features">
-                                    <li><i class="bi bi-check-circle-fill"></i>Access to all conference sessions</li>
-                                    <li><i class="bi bi-check-circle-fill"></i>Welcome reception networking</li>
-                                    <li><i class="bi bi-check-circle-fill"></i>Coffee breaks and lunch included</li>
-                                    <li><i class="bi bi-check-circle-fill"></i>Digital conference materials</li>
-                                    <li><i class="bi bi-check-circle-fill"></i>Certificate of attendance</li>
+                                    <li><i class="bi bi-check-circle-fill"></i>{{ \Carbon\Carbon::parse($event->event_date)->format('F d, Y H:i') }}</li>
+                                    <li><i class="bi bi-check-circle-fill"></i>{{ $event->venue }}</li>
                                 </ul>
                             </div>
                             <div class="ticket-footer">
-                                <a href="buy-tickets.html" class="btn btn-ticket">Register Now</a>
-                                <p class="availability-info">250 tickets remaining</p>
+                                <a data-bs-toggle="modal" data-bs-target="#ticketModal{{ $ticket->id }}" class="btn btn-ticket">Register Now</a>
+                                <p class="availability-info">{{ $ticket->quantity - $ticket->sold }} tickets remaining</p>
+
+
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <div class="ticket-card featured">
-                            <div class="popular-badge">Most Popular</div>
-                            <div class="ticket-header">
-                                <h3>VIP Experience</h3>
-                                <div class="ticket-price">
-                                    <span class="currency">$</span>
-                                    <span class="amount">299</span>
-                                    <span class="period">/ticket</span>
+                    @endforeach
+                    @foreach($event->tickets as $ticket)
+                    <div class="modal fade" id="ticketModal{{ $ticket->id }}" tabindex="-1" aria-labelledby="ticketModalLabel{{ $ticket->id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="ticketModalLabel{{ $ticket->id }}">Buy {{ $ticket->name }} Ticket</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
-                                <p class="ticket-duration">3-Day Premium Access</p>
-                            </div>
-                            <div class="ticket-body">
-                                <ul class="ticket-features">
-                                    <li><i class="bi bi-check-circle-fill"></i>All General Admission benefits</li>
-                                    <li><i class="bi bi-check-circle-fill"></i>Reserved front row seating</li>
-                                    <li><i class="bi bi-check-circle-fill"></i>Exclusive VIP networking lounge</li>
-                                    <li><i class="bi bi-check-circle-fill"></i>Meet &amp; greet with keynote speakers</li>
-                                    <li><i class="bi bi-check-circle-fill"></i>Premium swag bag worth $150</li>
-                                    <li><i class="bi bi-check-circle-fill"></i>Private dinner with industry leaders</li>
-                                </ul>
-                            </div>
-                            <div class="ticket-footer">
-                                <a href="buy-tickets.html" class="btn btn-ticket">Get VIP Access</a>
-                                <p class="availability-info">Limited to 50 attendees</p>
-                            </div>
-                        </div>
-                    </div>
+                                <div class="modal-body">
+                                    <form action="{{ route('checkout') }}" method="POST" class="ticket-form">
+                                        @csrf
+                                        <input type="hidden" name="ticket_id" value="{{ $ticket->id }}">
 
-                    <div class="col-lg-4 col-md-6">
-                        <div class="ticket-card">
-                            <div class="ticket-header">
-                                <h3>Student Pass</h3>
-                                <div class="ticket-price">
-                                    <span class="original-price">$149</span>
-                                    <span class="currency">$</span>
-                                    <span class="amount">79</span>
-                                    <span class="period">/ticket</span>
+                                        <div class="mb-2">
+                                            <label>Quantity</label>
+                                            <input type="number" name="quantity" class="form-control ticket-quantity" min="1" max="{{ $ticket->quantity - $ticket->sold }}" value="1" required>
+                                        </div>
+
+                                        <div class="attendees-section mb-2"></div>
+
+                                        <h5>Buyer Details</h5>
+                                        <div class="row mb-2">
+                                            <div class="col-md-4">
+                                                <input type="text" name="customer_name" class="form-control" placeholder="Full Name" required>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="email" name="customer_email" class="form-control" placeholder="Email" required>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="text" name="customer_phone" class="form-control" placeholder="Phone" required>
+                                            </div>
+                                        </div>
+
+                                        <h5>Total: $<span class="total-price">{{ number_format($ticket->price, 2) }}</span></h5>
+                                        <input type="hidden" name="total_amount" class="total-amount" value="{{ $ticket->price }}">
+
+                                        <button type="submit" class="btn btn-success w-100 mt-2">Proceed to Checkout</button>
+                                    </form>
                                 </div>
-                                <p class="ticket-duration">3-Day Student Access</p>
-                            </div>
-                            <div class="ticket-body">
-                                <ul class="ticket-features">
-                                    <li><i class="bi bi-check-circle-fill"></i>All conference sessions access</li>
-                                    <li><i class="bi bi-check-circle-fill"></i>Student networking events</li>
-                                    <li><i class="bi bi-check-circle-fill"></i>Career fair participation</li>
-                                    <li><i class="bi bi-check-circle-fill"></i>Mentorship program eligibility</li>
-                                    <li><i class="bi bi-check-circle-fill"></i>Student resource kit</li>
-                                </ul>
-                            </div>
-                            <div class="ticket-footer">
-                                <a href="buy-tickets.html" class="btn btn-ticket">Student Registration</a>
-                                <p class="availability-info">Valid student ID required</p>
                             </div>
                         </div>
                     </div>
-
-                </div>
-
-                <div class="row mt-5">
+                    @endforeach
+                    @endforeach
+                    @else
                     <div class="col-12">
-                        <div class="ticket-info-bar">
-                            <div class="countdown-info">
-                                <h4><i class="bi bi-clock"></i> Early Bird Pricing Ends Soon!</h4>
-                                <div class="countdown d-flex justify-content-center" data-count="2026/12/15">
-                                    <div>
-                                        <h3 class="count-days"></h3>
-                                        <h4>Days</h4>
-                                    </div>
-                                    <div>
-                                        <h3 class="count-hours"></h3>
-                                        <h4>Hours</h4>
-                                    </div>
-                                    <div>
-                                        <h3 class="count-minutes"></h3>
-                                        <h4>Minutes</h4>
-                                    </div>
-                                    <div>
-                                        <h3 class="count-seconds"></h3>
-                                        <h4>Seconds</h4>
-                                    </div>
+                        <div class="content text-center">
+                            <h2>No tickets available</h2>
+                            <p class="lead">Please check back later for ticket availability.</p>
+                        </div>
+                    </div>
+                    @endif
+                    <div class="row mt-5">
+                        <div class="col-12">
+                            <div class="ticket-info-bar">
+                                <div class="countdown-info">
+                                    <h4><i class="bi bi-clock"></i> Early Bird Pricing Ends Soon!</h4>
+                                    <!-- <div class="countdown d-flex justify-content-center" data-count="2026/12/15">
+                                            <div>
+                                                <h3 class="count-days"></h3>
+                                                <h4>Days</h4>
+                                            </div>
+                                            <div>
+                                                <h3 class="count-hours"></h3>
+                                                <h4>Hours</h4>
+                                            </div>
+                                            <div>
+                                                <h3 class="count-minutes"></h3>
+                                                <h4>Minutes</h4>
+                                            </div>
+                                            <div>
+                                                <h3 class="count-seconds"></h3>
+                                                <h4>Seconds</h4>
+                                            </div>
+                                        </div> -->
                                 </div>
-                            </div>
-                            <div class="support-info">
-                                <p><strong>Need help choosing?</strong> Contact our support team</p>
-                                <a href="mailto:tickets@example.com" class="contact-link">tickets@example.com</a>
-                                <span class="divider">|</span>
-                                <a href="tel:+15551234567" class="contact-link">+1 (555) 123-4567</a>
+                                <div class="support-info">
+                                    <p><strong>Need help choosing?</strong> Contact our support team</p>
+                                    <a href="mailto:tickets@example.com" class="contact-link">tickets@example.com</a>
+                                    <span class="divider">|</span>
+                                    <a href="tel:+15551234567" class="contact-link">+1 (555) 123-4567</a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-            </div>
+                </div>
 
         </section><!-- /Tickets Section -->
 
@@ -363,9 +341,13 @@
     <footer id="footer" class="footer position-relative dark-background">
 
         <div class="container copyright text-center mt-4">
-            <p>© <span>Copyright</span> <strong class="px-1 sitename">{{ config('app.name') }}</strong> <span>All Rights Reserved</span></p>
+            <p>© <span>Copyright</span>
+                <script>
+                    document.write(new Date().getFullYear());
+                </script> <strong class="px-1 sitename">{{ config('app.name') }}</strong> <span>All Rights Reserved</span>
+            </p>
             <div class="credits">
-                Designed by <a href="https://homiez.rw">Homiez</a>
+                Designed by <a href="https://homiez.rw">HOMIEZ</a>
             </div>
         </div>
 
@@ -386,6 +368,53 @@
 
     <!-- Main JS File -->
     <script src="assets/js/main.js"></script>
+
+    <script>
+        document.querySelectorAll('.ticket-form').forEach(form => {
+            const quantityInput = form.querySelector('.ticket-quantity');
+            const attendeesSection = form.querySelector('.attendees-section');
+            const totalPriceSpan = form.querySelector('.total-price');
+            const totalAmountInput = form.querySelector('.total-amount');
+            const ticketPrice = parseFloat(totalAmountInput.value);
+
+            function updateAttendees() {
+                const qty = parseInt(quantityInput.value) || 1;
+                attendeesSection.innerHTML = '';
+                for (let i = 1; i <= qty; i++) {
+                    attendeesSection.innerHTML += `<input type="text" name="attendees[]" class="form-control mb-1" placeholder="Attendee ${i} Name" required>`;
+                }
+                const total = ticketPrice * qty;
+                totalPriceSpan.textContent = total.toFixed(2);
+                totalAmountInput.value = total.toFixed(2);
+            }
+
+            quantityInput.addEventListener('input', updateAttendees);
+            updateAttendees();
+        });
+    </script>
+
+    <script>
+        @if(isset($featuredEvent))
+        const eventDate = new Date("{{ \Carbon\Carbon::parse($featuredEvent->event_date)->format('Y-m-d H:i:s') }}").getTime();
+        const timer = document.getElementById('timer');
+        setInterval(() => {
+            const now = new Date().getTime();
+            const distance = eventDate - now;
+
+            if (distance < 0) {
+                timer.innerHTML = "Event Started!";
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            timer.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }, 1000);
+        @endif
+    </script>
 
 </body>
 
