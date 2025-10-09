@@ -5493,3 +5493,32 @@ section,
 .starter-section {
   /* Add your styles here */
 }
+
+.front-btn-ticket {
+    color: var(--contrast-color);
+    font-weight: 600;
+    font-size: 16px;
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 15px;
+    background: var(--accent-color);
+    padding: 15px 30px;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: 0.3s;
+    border: 2px solid var(--accent-color);
+}
+.front-btn-ticket:hover {
+    color: var(--contrast-color);
+    font-weight: 600;
+    font-size: 16px;
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 15px;
+    background: var(--accent-color);
+    padding: 15px 30px;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: 0.3s;
+    border: 2px solid var(--contrast-color);
+}

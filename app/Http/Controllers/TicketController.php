@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\TicketMail;
 use App\Models\Event;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Ticket;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class TicketController extends Controller
 {
@@ -87,5 +92,64 @@ class TicketController extends Controller
         $ticket->delete();
 
         return redirect()->back()->with('success', 'Ticket deleted successfully!');
+    }
+
+    // Show all tickets after payment success
+    public function showTicket($id)
+    {
+        $order = Order::with('items.ticket.event', 'items.codes')->findOrFail($id);
+
+        return view('tickets.show', compact('order'));
+    }
+
+    // Generate individual ticket PDF
+    public function downloadTicket($id)
+    {
+        $item = OrderItem::with('ticket.event', 'codes')->findOrFail($id);
+
+        $pdf = Pdf::loadView('tickets.pdf', compact('item'));
+
+        return $pdf->download('ticket_' . $item->id . '.pdf');
+    }
+
+    // Send email with all ticket PDFs
+    public static function sendTicketsByEmail(Order $order)
+    {
+        $pdfs = [];
+
+        foreach ($order->items as $item) {
+            $pdf = Pdf::loadView('tickets.pdf', compact('item'))->output();
+            $pdfs[] = [
+                'filename' => 'ticket_' . $item->id . '.pdf',
+                'content' => $pdf,
+            ];
+        }
+
+        Mail::to($order->customer_email)->send(new TicketMail($order, $pdfs));
+    }
+
+    // Show all tickets for an order
+    public function showOrderTickets(Order $order)
+    {
+        $order->load('items.ticket.event', 'items.codes');
+        return view('tickets.adminShow', compact('order'));
+    }
+
+    
+
+    // Send single ticket via email
+    public function sendTicketEmail(Request $request, OrderItem $item)
+    {
+        $item->load('ticket.event', 'codes', 'order');
+        $pdf = Pdf::loadView('tickets.pdf', compact('item'));
+
+        Mail::send([], [], function($message) use ($item, $pdf) {
+            $message->to($item->order->customer_email)
+                ->subject('Your Ticket: '.$item->ticket->name)
+                ->attachData($pdf->output(), 'ticket_'.$item->id.'.pdf')
+                ->setBody('Please find your ticket attached.', 'text/html');
+        });
+
+        return back()->with('success', 'Ticket sent to '.$item->order->customer_email);
     }
 }

@@ -1,18 +1,48 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>Order Receipt #{{ $order->id }}</title>
     <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 14px; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h2 { margin: 0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .total { text-align: right; font-weight: bold; }
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 14px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h2 {
+            margin: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .total {
+            text-align: right;
+            font-weight: bold;
+        }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h2>Order Receipt</h2>
@@ -39,18 +69,18 @@
         </thead>
         <tbody>
             @foreach($order->items as $item)
-                <tr>
-                    <td>{{ $item->ticket->event->title }}</td>
-                    <td>{{ $item->ticket->name }}</td>
-                    <td>{{ $item->quantity }}</td>
-                    <td>${{ number_format($item->unit_price, 2) }}</td>
-                    <td>
-                        @foreach($item->codes as $code)
-                            <span>{{ $code->code }}</span>@if(!$loop->last), @endif
-                        @endforeach
-                    </td>
-                    <td>${{ number_format($item->unit_price * $item->quantity, 2) }}</td>
-                </tr>
+            <tr>
+                <td>{{ $item->ticket->event->title }}</td>
+                <td>{{ $item->ticket->name }}</td>
+                <td>{{ $item->quantity }}</td>
+                <td>${{ number_format($item->unit_price, 2) }}</td>
+                <td>
+                    @foreach($item->codes as $code)
+                    <span>{{ $code->code }}</span>@if(!$loop->last), @endif
+                    @endforeach
+                </td>
+                <td>${{ number_format($item->unit_price * $item->quantity, 2) }}</td>
+            </tr>
             @endforeach
             <tr>
                 <td colspan="5" class="total">Total Amount</td>
@@ -59,4 +89,5 @@
         </tbody>
     </table>
 </body>
+
 </html>

@@ -47,7 +47,7 @@
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
             </nav>
 
-            <a class="btn-getstarted" href="buy-tickets.html">Buy Tickets</a>
+            <a class="btn-getstarted" href="#tickets">Buy Tickets</a>
 
         </div>
     </header>
@@ -115,7 +115,7 @@
 
                     <div class="sponsors-section">
 
-                        <p class="sponsors-label">Proudly supported by industry leaders</p>
+                        <p class="sponsors-label">Proudly supported by </p>
 
                         <div class="sponsors-logos">
                             <img src="assets/img/clients/clients-1.webp" alt="Partner Logo" class="sponsor-logo">
@@ -175,7 +175,7 @@
                     <div class="col-lg-6">
                         <div class="visual-section">
                             <div class="image-wrapper">
-                                <img src="assets/img/events/showcase-5.webp" alt="Tech Summit" class="img-fluid">
+                                <img src="{{ asset('storage/' . $featuredEvent->image) }}" alt="{{ $featuredEvent->title }}" class="img-fluid">
                                 <div class="gradient-overlay"></div>
                                 <div class="floating-badge">
                                     <i class="bi bi-calendar-event"></i>
@@ -247,46 +247,95 @@
                     @endforeach
                     @foreach($event->tickets as $ticket)
                     <div class="modal fade" id="ticketModal{{ $ticket->id }}" tabindex="-1" aria-labelledby="ticketModalLabel{{ $ticket->id }}" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="ticketModalLabel{{ $ticket->id }}">Buy {{ $ticket->name }} Ticket</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <form action="{{ route('checkout') }}" method="POST" class="ticket-form">
-                                        @csrf
-                                        <input type="hidden" name="ticket_id" value="{{ $ticket->id }}">
+                        <div class="modal-dialog modal-dialog-centered modal-xl">
+                            <div class="modal-content border-0 shadow-lg rounded-4">
 
-                                        <div class="mb-2">
-                                            <label>Quantity</label>
-                                            <input type="number" name="quantity" class="form-control ticket-quantity" min="1" max="{{ $ticket->quantity - $ticket->sold }}" value="1" required>
+                                {{-- Modal Header --}}
+                                <div class="modal-header bg-primary text-white rounded-top-4">
+                                    <h5 class="modal-title" id="ticketModalLabel{{ $ticket->id }}">
+                                        Buy {{ $ticket->name }} Ticket
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+
+                                {{-- Modal Body --}}
+                                <div class="modal-body p-4">
+                                    <div class="row">
+                                        {{-- Ticket Preview --}}
+                                        <div class="col-lg-5 mb-3 mb-lg-0">
+                                            <div class="card shadow-sm border-0 rounded-4">
+                                                <img src="{{ asset('storage/' . $ticket->event->image) }}" class="card-img-top rounded-top-4" alt="{{ $ticket->event->title }}">
+                                                <div class="card-body text-center">
+                                                    <h5 class="card-title fw-bold">{{ $ticket->event->title }}</h5>
+                                                    <p class="mb-1"><strong>Ticket Type:</strong> {{ $ticket->name }}</p>
+                                                    <p class="mb-1"><strong>Price:</strong> ${{ number_format($ticket->price, 2) }}</p>
+                                                    <p class="mb-1"><strong>Date:</strong> {{ \Carbon\Carbon::parse($ticket->event->event_date)->format('d M Y, h:i A') }}</p>
+                                                    <p class="mb-1"><strong>Venue:</strong> {{ $ticket->event->venue }}</p>
+
+                                                    {{-- QR Code Placeholder --}}
+                                                    <div class="mt-3">
+                                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=TICKET{{ $ticket->id }}" class="img-fluid rounded" alt="QR Code">
+                                                        <p class="small text-muted mt-1">Scan at entry</p>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        <div class="attendees-section mb-2"></div>
+                                        {{-- Form Section --}}
+                                        <div class="col-lg-7">
+                                            <form action="{{ route('checkout') }}" method="POST" class="ticket-form">
+                                                @csrf
+                                                <input type="hidden" name="ticket_id" value="{{ $ticket->id }}">
 
-                                        <h5>Buyer Details</h5>
-                                        <div class="row mb-2">
-                                            <div class="col-md-4">
-                                                <input type="text" name="customer_name" class="form-control" placeholder="Full Name" required>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <input type="email" name="customer_email" class="form-control" placeholder="Email" required>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <input type="text" name="customer_phone" class="form-control" placeholder="Phone" required>
-                                            </div>
+                                                {{-- Ticket Info --}}
+                                                <div class="mb-3">
+                                                    <p class="mb-1"><strong>Ticket Price:</strong> ${{ number_format($ticket->price, 2) }}</p>
+                                                    <p class="mb-1"><strong>Available:</strong> {{ $ticket->quantity - $ticket->sold }}</p>
+                                                </div>
+
+                                                {{-- Quantity --}}
+                                                <div class="mb-3">
+                                                    <label class="form-label">Quantity</label>
+                                                    <input type="number" name="quantity" class="form-control ticket-quantity" min="1" max="{{ $ticket->quantity - $ticket->sold }}" value="1" required>
+                                                </div>
+
+                                                {{-- Attendees Section --}}
+                                                <div class="attendees-section mb-3"></div>
+
+                                                {{-- Buyer Details --}}
+                                                <h6 class="fw-bold mb-2 text-primary">Buyer Details</h6>
+                                                <div class="row g-2 mb-3">
+                                                    <div class="col-md-4">
+                                                        <input type="text" name="customer_name" class="form-control" placeholder="Full Name" required>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <input type="email" name="customer_email" class="form-control" placeholder="Email" required>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <input type="text" name="customer_phone" class="form-control" placeholder="Phone" required>
+                                                    </div>
+                                                </div>
+
+                                                {{-- Total --}}
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <h5 class="fw-bold mb-0">Total:</h5>
+                                                    <h5 class="text-success mb-0">$<span class="total-price">{{ number_format($ticket->price, 2) }}</span></h5>
+                                                </div>
+                                                <input type="hidden" name="total_amount" class="total-amount" value="{{ $ticket->price }}">
+
+                                                {{-- Checkout Button --}}
+                                                <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">
+                                                    <i class="bi bi-cart-fill me-1"></i> Proceed to Checkout
+                                                </button>
+                                            </form>
                                         </div>
-
-                                        <h5>Total: $<span class="total-price">{{ number_format($ticket->price, 2) }}</span></h5>
-                                        <input type="hidden" name="total_amount" class="total-amount" value="{{ $ticket->price }}">
-
-                                        <button type="submit" class="btn btn-success w-100 mt-2">Proceed to Checkout</button>
-                                    </form>
+                                    </div>
                                 </div>
+
                             </div>
                         </div>
                     </div>
+
                     @endforeach
                     @endforeach
                     @else
